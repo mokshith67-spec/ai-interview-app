@@ -1,7 +1,6 @@
 import streamlit as st
 from streamlit_mic_recorder import mic_recorder
 from openai import OpenAI
-import tempfile
 import os
 
 # OpenAI client
@@ -42,7 +41,6 @@ if st.button("Start Interview"):
     st.session_state.role = role
     st.session_state.q_index = 0
     st.session_state.start_interview = True
-    st.session_state.answers = []
     st.rerun()
 
 # ---------------- QUESTIONS ----------------
@@ -82,26 +80,10 @@ if "start_interview" in st.session_state and st.session_state.start_interview:
         st.write("### Question:")
         st.write(question)
 
-        st.write("### Record Your Answer:")
-        audio = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="⏹ Stop Recording", key=str(q_index))
+        # Instead of Whisper, user types answer (fallback)
+        answer = st.text_area("Type your answer (or paste voice-to-text)")
 
-        if audio:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
-                f.write(audio['bytes'])
-                audio_path = f.name
-
-            # Speech to text (Whisper)
-            audio_file = open(audio_path, "rb")
-            transcript = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_file
-            )
-            answer = transcript.text
-
-            st.write("### Your Answer:")
-            st.write(answer)
-
-            # AI Feedback
+        if st.button("Get AI Feedback"):
             prompt = f"""
             Evaluate this interview answer.
 
@@ -127,10 +109,10 @@ if "start_interview" in st.session_state and st.session_state.start_interview:
             st.write("### AI Feedback:")
             st.write(feedback)
 
-            if st.button("Next Question"):
-                st.session_state.q_index += 1
-                st.rerun()
+        if st.button("Next Question"):
+            st.session_state.q_index += 1
+            st.rerun()
 
     else:
         st.write("## Interview Finished")
-        st.write("Thank you for attending the AI Interview")
+        st.write("You have completed the interview.")
