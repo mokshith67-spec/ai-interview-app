@@ -9,15 +9,47 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 st.title("AI Voice Interview System")
 
-name = st.text_input("Enter your name")
-role = st.selectbox("Select Job Role", ["Software Developer", "HR", "Marketing", "Data Analyst"])
+# Job role questions
+questions = {
+    "Software Developer": [
+        "Tell me about yourself",
+        "What is OOP?",
+        "Explain a project you worked on"
+    ],
+    "HR": [
+        "Tell me about yourself",
+        "What are your strengths?",
+        "How do you handle stress?"
+    ],
+    "Marketing": [
+        "Tell me about yourself",
+        "How will you sell a product?",
+        "What is digital marketing?"
+    ],
+    "Data Analyst": [
+        "Tell me about yourself",
+        "What is Excel?",
+        "What is data cleaning?"
+    ]
+}
 
-question = "Tell me about yourself"
+name = st.text_input("Enter your name")
+role = st.selectbox("Select Job Role", list(questions.keys()))
+
+if "question_index" not in st.session_state:
+    st.session_state.question_index = 0
+    st.session_state.score = 0
 
 if st.button("Start Interview"):
-    st.write("AI Question:", question)
+    st.session_state.question_index = 0
+    st.session_state.score = 0
 
-    audio = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="⏹ Stop Recording", key="recorder")
+# Show current question
+if st.session_state.question_index < len(questions[role]):
+    question = questions[role][st.session_state.question_index]
+    st.write("### AI Question:", question)
+
+    audio = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="⏹ Stop Recording", key=str(st.session_state.question_index))
 
     if audio:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
@@ -38,11 +70,11 @@ if st.button("Start Interview"):
         Answer: {answer}
 
         Give:
-        Communication Score
-        Confidence Score
-        Grammar Score
-        Content Score
-        Overall Score
+        Communication Score (out of 10)
+        Confidence Score (out of 10)
+        Grammar Score (out of 10)
+        Content Score (out of 10)
+        Overall Score (out of 10)
         Emotion (Confident/Nervous/Average)
         One improvement tip
         """
@@ -52,5 +84,15 @@ if st.button("Start Interview"):
             messages=[{"role": "user", "content": prompt}]
         )
 
-        st.write("AI Feedback:")
-        st.write(response.choices[0].message.content)
+        feedback = response.choices[0].message.content
+        st.write("### AI Feedback:")
+        st.write(feedback)
+
+        st.session_state.question_index += 1
+
+        if st.button("Next Question"):
+            st.rerun()
+
+else:
+    st.write("## Interview Finished")
+    st.write("Thank you for attending the AI Interview")
