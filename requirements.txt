@@ -1,4 +1,4 @@
 streamlit
 streamlit-mic-recorder
-openai
+openai>=1.0.0
 reportlab
