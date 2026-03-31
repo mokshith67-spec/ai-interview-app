@@ -3,8 +3,6 @@ import openai
 import os
 from streamlit_mic_recorder import mic_recorder
 import tempfile
-import speech_recognition as sr
-import wave
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -72,23 +70,14 @@ if st.session_state.question_index < len(questions[role]):
             f.write(audio['bytes'])
             audio_path = f.name
 
-        # Convert audio to proper WAV
-        with wave.open(audio_path, 'rb') as wave_file:
-            frames = wave_file.readframes(wave_file.getnframes())
-            temp_wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-            with wave.open(temp_wav.name, 'wb') as new_wav:
-                new_wav.setnchannels(1)
-                new_wav.setsampwidth(2)
-                new_wav.setframerate(44100)
-                new_wav.writeframes(frames)
-
-        r = sr.Recognizer()
-        with sr.AudioFile(temp_wav.name) as source:
-            audio_data = r.record(source)
-            answer = r.recognize_google(audio_data)
+        # Speech to text using Whisper
+        audio_file = open(audio_path, "rb")
+        transcript = openai.Audio.transcribe("whisper-1", audio_file)
+        answer = transcript["text"]
 
         st.write("Your Answer:", answer)
 
+        # AI Feedback
         prompt = f"""
         Evaluate this interview answer.
 
