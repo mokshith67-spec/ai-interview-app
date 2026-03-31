@@ -1,13 +1,11 @@
-from openai import OpenAI
-client = OpenAI()
-
 import streamlit as st
 from streamlit_mic_recorder import mic_recorder
-import openai
+from openai import OpenAI
 import tempfile
 import os
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(page_title="AI Interview System")
 
@@ -92,11 +90,11 @@ if "start_interview" in st.session_state and st.session_state.start_interview:
                 f.write(audio['bytes'])
                 audio_path = f.name
 
-            # Speech to text
+            # Speech to text (Whisper)
             audio_file = open(audio_path, "rb")
             transcript = client.audio.transcriptions.create(
-            model="whisper-1",
-            file=audio_file
+                model="whisper-1",
+                file=audio_file
             )
             answer = transcript.text
 
@@ -120,7 +118,7 @@ if "start_interview" in st.session_state and st.session_state.start_interview:
             One improvement tip
             """
 
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}]
             )
@@ -132,6 +130,7 @@ if "start_interview" in st.session_state and st.session_state.start_interview:
             if st.button("Next Question"):
                 st.session_state.q_index += 1
                 st.rerun()
+
     else:
         st.write("## Interview Finished")
-        st.write("Next step → Generate Final Report")
+        st.write("Thank you for attending the AI Interview")
