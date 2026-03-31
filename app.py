@@ -1,8 +1,4 @@
 import streamlit as st
-import openai
-import os
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 st.set_page_config(page_title="AI Interview System")
 
@@ -37,22 +33,48 @@ role = st.selectbox(
 
 if st.button("Start Interview"):
     st.session_state.role = role
-    st.session_state.question_number = 1
+    st.session_state.q_index = 0
     st.session_state.start_interview = True
     st.rerun()
 
-# ---------------- AI INTERVIEW ----------------
+# ---------------- QUESTIONS ----------------
+questions = {
+    "Software Developer": [
+        "Tell me about yourself",
+        "What is OOP?",
+        "Explain your project"
+    ],
+    "HR": [
+        "Tell me about yourself",
+        "What are your strengths?",
+        "How do you handle stress?"
+    ],
+    "Marketing": [
+        "Tell me about yourself",
+        "How will you sell a product?",
+        "What is digital marketing?"
+    ],
+    "Data Analyst": [
+        "Tell me about yourself",
+        "What is Excel?",
+        "What is data cleaning?"
+    ]
+}
+
+# ---------------- INTERVIEW ----------------
 if "start_interview" in st.session_state and st.session_state.start_interview:
-    st.title("AI Interview Round")
+    st.title("Interview Round")
     st.write("Role:", st.session_state.role)
 
-    prompt = f"Ask a simple interview question for a {st.session_state.role}. Question number {st.session_state.question_number}."
+    q_list = questions[st.session_state.role]
+    q_index = st.session_state.q_index
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}]
-    )
+    if q_index < len(q_list):
+        st.write("### Question:")
+        st.write(q_list[q_index])
 
-    question = response.choices[0].message.content
-    st.write("### AI Question:")
-    st.write(question)
+        if st.button("Next Question"):
+            st.session_state.q_index += 1
+            st.rerun()
+    else:
+        st.write("Interview Finished")
