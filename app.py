@@ -1,4 +1,8 @@
 import streamlit as st
+import openai
+import os
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 st.set_page_config(page_title="AI Interview System")
 
@@ -26,20 +30,29 @@ if st.session_state.user is None:
 st.title("AI Interview Dashboard")
 st.write("Welcome:", st.session_state.user)
 
-st.subheader("Select Job Role")
-
 role = st.selectbox(
-    "Choose role",
+    "Select Job Role",
     ["Software Developer", "HR", "Marketing", "Data Analyst"]
 )
 
 if st.button("Start Interview"):
     st.session_state.role = role
+    st.session_state.question_number = 1
     st.session_state.start_interview = True
     st.rerun()
 
-# ---------------- INTERVIEW START ----------------
+# ---------------- AI INTERVIEW ----------------
 if "start_interview" in st.session_state and st.session_state.start_interview:
-    st.title("Interview Started")
+    st.title("AI Interview Round")
     st.write("Role:", st.session_state.role)
-    st.write("Next step → AI will ask question")
+
+    prompt = f"Ask a simple interview question for a {st.session_state.role}. Question number {st.session_state.question_number}."
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    question = response.choices[0].message.content
+    st.write("### AI Question:")
+    st.write(question)
