@@ -1,6 +1,5 @@
 import streamlit as st
 from ai_engine import analyze_answer, generate_question
-from voice_to_text import record_voice
 from pdf_report import generate_pdf
 
 st.set_page_config(page_title="AI Interview Trainer", layout="centered")
@@ -14,11 +13,6 @@ interview_type = st.selectbox(
     ["HR Interview", "Technical Interview", "Group Discussion"]
 )
 
-input_method = st.radio(
-    "Select Answer Method",
-    ["Type", "Voice"]
-)
-
 if st.button("Start Interview"):
     question = generate_question(interview_type)
     st.session_state.question = question
@@ -27,14 +21,7 @@ if "question" in st.session_state:
     st.write("### Interview Question:")
     st.write(st.session_state.question)
 
-    if input_method == "Type":
-        answer = st.text_area("Type Your Answer")
-    else:
-        if st.button("Record Voice"):
-            answer = record_voice()
-            st.write("Recorded Answer:", answer)
-        else:
-            answer = ""
+    answer = st.text_area("Type Your Answer")
 
     if st.button("Submit Answer"):
         feedback, score = analyze_answer(answer)
