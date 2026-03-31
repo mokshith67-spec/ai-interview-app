@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="AI Interview System")
 
-# Login system
+# ---------------- LOGIN ----------------
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -22,7 +22,24 @@ if st.session_state.user is None:
 
     st.stop()
 
-# After login
+# ---------------- DASHBOARD ----------------
 st.title("AI Interview Dashboard")
 st.write("Welcome:", st.session_state.user)
-st.write("Next step → Select Job Role")
+
+st.subheader("Select Job Role")
+
+role = st.selectbox(
+    "Choose role",
+    ["Software Developer", "HR", "Marketing", "Data Analyst"]
+)
+
+if st.button("Start Interview"):
+    st.session_state.role = role
+    st.session_state.start_interview = True
+    st.rerun()
+
+# ---------------- INTERVIEW START ----------------
+if "start_interview" in st.session_state and st.session_state.start_interview:
+    st.title("Interview Started")
+    st.write("Role:", st.session_state.role)
+    st.write("Next step → AI will ask question")
