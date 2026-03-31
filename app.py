@@ -1,3 +1,21 @@
+# LOGIN SYSTEM
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.title("Login - AI Interview System")
+    username = st.text_input("Enter Email")
+    password = st.text_input("Enter Password", type="password")
+
+    if st.button("Login"):
+        if username and password:
+            st.session_state.logged_in = True
+            st.rerun()
+        else:
+            st.error("Enter login details")
+
+    st.stop()
+
 import streamlit as st
 import openai
 import os
@@ -56,10 +74,24 @@ if st.session_state.question_index < len(questions[role]):
             f.write(audio['bytes'])
             audio_path = f.name
 
-        r = sr.Recognizer()
-        with sr.AudioFile(audio_path) as source:
-            audio_data = r.record(source)
-            answer = r.recognize_google(audio_data)
+        
+       import wave
+import contextlib
+
+# Convert audio to proper wav
+with wave.open(audio_path, 'rb') as wave_file:
+    frames = wave_file.readframes(wave_file.getnframes())
+    temp_wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    with wave.open(temp_wav.name, 'wb') as new_wav:
+        new_wav.setnchannels(1)
+        new_wav.setsampwidth(2)
+        new_wav.setframerate(44100)
+        new_wav.writeframes(frames)
+
+r = sr.Recognizer()
+with sr.AudioFile(temp_wav.name) as source:
+    audio_data = r.record(source)
+    answer = r.recognize_google(audio_data)
 
         st.write("Your Answer:", answer)
 
