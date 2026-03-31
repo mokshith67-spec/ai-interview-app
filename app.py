@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_mic_recorder import mic_recorder
 
 st.set_page_config(page_title="AI Interview System")
 
@@ -72,6 +73,17 @@ if "start_interview" in st.session_state and st.session_state.start_interview:
     if q_index < len(q_list):
         st.write("### Question:")
         st.write(q_list[q_index])
+
+        st.write("### Record Your Answer:")
+
+        audio = mic_recorder(
+            start_prompt="🎤 Start Recording",
+            stop_prompt="⏹ Stop Recording",
+            key=str(q_index)
+        )
+
+        if audio:
+            st.success("Answer recorded!")
 
         if st.button("Next Question"):
             st.session_state.q_index += 1
