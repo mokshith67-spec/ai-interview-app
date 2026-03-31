@@ -94,8 +94,11 @@ if "start_interview" in st.session_state and st.session_state.start_interview:
 
             # Speech to text
             audio_file = open(audio_path, "rb")
-            transcript = openai.Audio.transcribe("whisper-1", audio_file)
-            answer = transcript["text"]
+            transcript = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=audio_file
+            )
+            answer = transcript.text
 
             st.write("### Your Answer:")
             st.write(answer)
